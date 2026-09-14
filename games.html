@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ToYoWare — games</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="games.css">
+</head>
+
+<body>
+
+  <header class="navbar">
+    <div class="navbar__brand">
+      <span class="dot dot--red"></span>
+      <span class="dot dot--yellow"></span>
+      <span class="dot dot--green"></span>
+      <a class="navbar__name" href="ToYoWare.html">ToYoWare.com</a>
+    </div>
+
+    <nav class="navbar__links">
+      <a href="games.html" class="is-active">Games</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html">Portfolio</a>
+      <a href="index.html#contact">contact</a>
+      <a href="#" id="adminToggle" class="admin-link">admin</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div class="terminal">
+      <div class="terminal__bar">
+        <span class="dot dot--red"></span>
+        <span class="dot dot--yellow"></span>
+        <span class="dot dot--green"></span>
+        <span class="terminal__title">~/games</span>
+      </div>
+      <div class="terminal__body">
+        <div class="terminal__line">
+          <span class="prompt">➜</span>
+          <span class="path">~/games</span>
+          <span class="cmd">ls --downloaded</span>
+        </div>
+        <div class="terminal__output" id="terminalOutput">reading library…</div>
+        <div class="terminal__line">
+          <span class="prompt">➜</span>
+          <span class="path">~/games</span>
+          <span class="cursor">▍</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section__eyebrow">$ cd ~/games</div>
+    <h1 class="section__title">game library</h1>
+
+    <ul class="about__facts stat-row" id="statFacts"></ul>
+
+    <div class="toolbar">
+      <div class="filters" id="filters">
+        <button data-filter="all" class="is-active">all</button>
+        <button data-filter="downloaded">downloaded</button>
+        <button data-filter="queued">queued</button>
+        <button data-filter="available">not downloaded</button>
+      </div>
+      <input class="search" id="search" placeholder="search games" />
+    </div>
+
+    <div class="projects__grid" id="grid"></div>
+
+    <p class="empty-state" id="emptyState" style="display:none;"></p>
+  </section>
+
+  <!-- Admin login -->
+  <div class="overlay" id="loginOverlay">
+    <div class="modal">
+      <h2 class="modal__title">admin login</h2>
+      <div class="contact-form">
+        <label for="adminKeyInput">admin key</label>
+        <input id="adminKeyInput" type="password" placeholder="enter admin key">
+      </div>
+      <div class="modal-actions">
+        <span></span>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn--ghost" id="loginCancel">cancel</button>
+          <button class="btn" id="loginSubmit">log in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / edit game -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2 class="modal__title" id="modalTitle">add game</h2>
+
+      <div class="contact-form">
+        <label for="fTitle">title</label>
+        <input id="fTitle" placeholder="e.g. Hollow Knight">
+      </div>
+
+      <div class="field-row">
+        <div class="contact-form">
+          <label for="fPlatform">platform</label>
+          <input id="fPlatform" placeholder="e.g. PC, Switch">
+        </div>
+        <div class="contact-form">
+          <label for="fSize">size (GB)</label>
+          <input id="fSize" type="number" step="0.1" min="0" placeholder="12.4">
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <label for="fStatus">status</label>
+        <select id="fStatus">
+          <option value="downloaded">downloaded</option>
+          <option value="queued">queued</option>
+          <option value="available">not downloaded</option>
+        </select>
+      </div>
+
+      <div class="contact-form">
+        <label for="fFile">game file (optional, max ~5.5MB — link out for bigger files)</label>
+        <input id="fFile" type="file">
+        <div id="fileStatus" class="file-status"></div>
+      </div>
+
+      <div class="contact-form">
+        <label for="fFileUrl">or paste an external download link</label>
+        <input id="fFileUrl" placeholder="https://...">
+      </div>
+
+      <div class="modal-actions">
+        <button class="link-btn" id="deleteBtn" style="display:none;">remove game</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn--ghost" id="cancelBtn">cancel</button>
+          <button class="btn" id="saveBtn">save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    ToYoWare.com — game library
+  </footer>
+
+<script>
+(function(){
+  var ADMIN_SESSION_KEY = 'toyoware_admin_key';
+  var games = [];
+  var activeFilter = 'all';
+  var searchTerm = '';
+  var editingId = null;
+  var pendingUpload = null; // { filename, contentType, dataBase64 }
+
+  var grid = document.getElementById('grid');
+  var emptyState = document.getElementById('emptyState');
+  var statFacts = document.getElementById('statFacts');
+  var terminalOutput = document.getElementById('terminalOutput');
+  var filtersEl = document.getElementById('filters');
+  var searchEl = document.getElementById('search');
+  var overlay = document.getElementById('overlay');
+  var modalTitle = document.getElementById('modalTitle');
+  var fTitle = document.getElementById('fTitle');
+  var fPlatform = document.getElementById('fPlatform');
+  var fSize = document.getElementById('fSize');
+  var fStatus = document.getElementById('fStatus');
+  var fFile = document.getElementById('fFile');
+  var fFileUrl = document.getElementById('fFileUrl');
+  var fileStatus = document.getElementById('fileStatus');
+  var deleteBtn = document.getElementById('deleteBtn');
+  var adminToggle = document.getElementById('adminToggle');
+  var loginOverlay = document.getElementById('loginOverlay');
+  var adminKeyInput = document.getElementById('adminKeyInput');
+
+  var statusLabel = { downloaded: 'downloaded', queued: 'queued', available: 'not downloaded' };
+
+  function isAdmin(){ return !!sessionStorage.getItem(ADMIN_SESSION_KEY); }
+  function adminKey(){ return sessionStorage.getItem(ADMIN_SESSION_KEY) || ''; }
+
+  function escapeHtml(str){
+    var div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  // ---- API ----
+  function apiGetGames(){
+    return fetch('/.netlify/functions/games').then(function(r){ return r.json(); });
+  }
+  function apiSaveGame(game, isNew){
+    return fetch('/.netlify/functions/games', {
+      method: isNew ? 'POST' : 'PUT',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey() },
+      body: JSON.stringify(game)
+    }).then(async function(r){
+      if (!r.ok) throw await r.json().catch(function(){ return { error: 'Request failed' }; });
+      return r.json();
+    });
+  }
+  function apiDeleteGame(id){
+    return fetch('/.netlify/functions/games', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey() },
+      body: JSON.stringify({ id: id })
+    }).then(async function(r){
+      if (!r.ok) throw await r.json().catch(function(){ return { error: 'Request failed' }; });
+      return r.json();
+    });
+  }
+  function apiUploadFile(payload){
+    return fetch('/.netlify/functions/file', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey() },
+      body: JSON.stringify(payload)
+    }).then(async function(r){
+      if (!r.ok) throw await r.json().catch(function(){ return { error: 'Upload failed' }; });
+      return r.json();
+    });
+  }
+
+  function fileToBase64(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(reader.result.split(',')[1]); };
+      reader.onerror = function(){ reject(new Error('Could not read file')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ---- render ----
+  function render(){
+    var total = games.length;
+    var downloaded = games.filter(function(g){ return g.status === 'downloaded'; }).length;
+    var totalSize = games.filter(function(g){ return g.status === 'downloaded'; })
+      .reduce(function(sum,g){ return sum + (parseFloat(g.size)||0); }, 0);
+
+    statFacts.innerHTML =
+      '<li><span class="stat-num">' + total + '</span><span class="stat-label">tracked</span></li>' +
+      '<li><span class="stat-num">' + downloaded + '</span><span class="stat-label">downloaded</span></li>' +
+      '<li><span class="stat-num">' + totalSize.toFixed(1) + ' GB</span><span class="stat-label">on disk</span></li>';
+
+    terminalOutput.textContent = total === 0
+      ? 'no games tracked yet'
+      : downloaded + ' of ' + total + ' games downloaded  ·  ' + totalSize.toFixed(1) + ' GB on disk';
+
+    var list = games.filter(function(g){
+      if (activeFilter !== 'all' && g.status !== activeFilter) return false;
+      if (searchTerm && g.title.toLowerCase().indexOf(searchTerm.toLowerCase()) === -1) return false;
+      return true;
+    });
+
+    var cardsHtml = list.map(function(g, i){
+      var downloadLink = g.fileUrl
+        ? '<a href="' + g.fileUrl + '" target="_blank" rel="noopener">download</a>'
+        : '';
+      var editLink = isAdmin() ? '<a href="#" data-edit="' + g.id + '">edit</a>' : '';
+      return '' +
+        '<div class="card" data-id="' + g.id + '">' +
+          '<div class="card--status">' +
+            '<div class="card__index">' + String(i+1).padStart(2,'0') + '</div>' +
+            '<div class="card__status-text status-' + g.status + '">' + statusLabel[g.status] + '</div>' +
+          '</div>' +
+          '<div class="card__title">' + escapeHtml(g.title) + '</div>' +
+          '<div class="card__desc">' + escapeHtml(g.platform || '—') + (g.size ? ' · ' + parseFloat(g.size).toFixed(1) + ' GB' : '') + '</div>' +
+          '<div class="card__links">' + downloadLink + editLink + '</div>' +
+        '</div>';
+    }).join('');
+
+    var addCardHtml = isAdmin() ? '<div class="card card--add" id="addCard">+ add game</div>' : '';
+
+    grid.innerHTML = cardsHtml + addCardHtml;
+
+    if (list.length === 0){
+      emptyState.style.display = 'block';
+      emptyState.textContent = games.length === 0
+        ? (isAdmin() ? 'nothing here yet — click "add game" to start tracking what\'s downloaded.' : 'nothing here yet.')
+        : 'no matches for this filter or search.';
+    } else {
+      emptyState.style.display = 'none';
+    }
+
+    var addCard = document.getElementById('addCard');
+    if (addCard) addCard.addEventListener('click', function(){ openModal(null); });
+  }
+
+  function refresh(){
+    return apiGetGames().then(function(data){
+      games = data;
+      render();
+    }).catch(function(){
+      terminalOutput.textContent = 'could not reach the library — check your connection';
+    });
+  }
+
+  // ---- filters / search ----
+  filtersEl.addEventListener('click', function(e){
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    filtersEl.querySelectorAll('button').forEach(function(b){ b.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    activeFilter = btn.dataset.filter;
+    render();
+  });
+  searchEl.addEventListener('input', function(){
+    searchTerm = searchEl.value;
+    render();
+  });
+
+  // ---- admin login ----
+  adminToggle.addEventListener('click', function(e){
+    e.preventDefault();
+    if (isAdmin()){
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      adminToggle.textContent = 'admin';
+      render();
+    } else {
+      adminKeyInput.value = '';
+      loginOverlay.classList.add('is-open');
+      adminKeyInput.focus();
+    }
+  });
+  document.getElementById('loginCancel').addEventListener('click', function(){
+    loginOverlay.classList.remove('is-open');
+  });
+  document.getElementById('loginSubmit').addEventListener('click', function(){
+    var val = adminKeyInput.value.trim();
+    if (!val) return;
+
+    var submitBtn = document.getElementById('loginSubmit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'checking…';
+
+    fetch('/.netlify/functions/verify', {
+      method: 'POST',
+      headers: { 'x-admin-key': val }
+    }).then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.ok){
+          sessionStorage.setItem(ADMIN_SESSION_KEY, val);
+          loginOverlay.classList.remove('is-open');
+          adminToggle.textContent = 'log out';
+          render();
+        } else {
+          alert('Incorrect admin key.');
+          adminKeyInput.value = '';
+          adminKeyInput.focus();
+        }
+      })
+      .catch(function(){
+        alert('Could not verify right now — check your connection and try again.');
+      })
+      .finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'log in';
+      });
+  });
+  loginOverlay.addEventListener('click', function(e){ if (e.target === loginOverlay) loginOverlay.classList.remove('is-open'); });
+
+  if (isAdmin()) adminToggle.textContent = 'log out';
+
+  // ---- add / edit modal ----
+  function openModal(game){
+    editingId = game ? game.id : null;
+    pendingUpload = null;
+    modalTitle.textContent = game ? 'edit game' : 'add game';
+    fTitle.value = game ? game.title : '';
+    fPlatform.value = game ? game.platform : '';
+    fSize.value = game ? game.size : '';
+    fStatus.value = game ? game.status : 'downloaded';
+    fFile.value = '';
+    fFileUrl.value = game ? (game.fileUrl || '') : '';
+    fileStatus.textContent = game && game.fileName ? ('current file: ' + game.fileName) : '';
+    deleteBtn.style.display = game ? 'inline-block' : 'none';
+    overlay.classList.add('is-open');
+    fTitle.focus();
+  }
+  function closeModal(){
+    overlay.classList.remove('is-open');
+    editingId = null;
+    pendingUpload = null;
+  }
+  document.getElementById('cancelBtn').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape'){ closeModal(); loginOverlay.classList.remove('is-open'); }
+  });
+
+  grid.addEventListener('click', function(e){
+    var link = e.target.closest('[data-edit]');
+    if (!link) return;
+    e.preventDefault();
+    var game = games.find(function(g){ return g.id === link.dataset.edit; });
+    if (game) openModal(game);
+  });
+
+  fFile.addEventListener('change', function(){
+    if (!fFile.files[0]) return;
+    fileStatus.textContent = 'selected: ' + fFile.files[0].name + ' (will upload on save)';
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', function(){
+    if (!isAdmin()) return;
+    var title = fTitle.value.trim();
+    if (!title){ fTitle.focus(); return; }
+
+    var basePayload = {
+      title: title,
+      platform: fPlatform.value.trim(),
+      size: fSize.value,
+      status: fStatus.value,
+      fileUrl: fFileUrl.value.trim(),
+      fileName: ''
+    };
+    if (editingId) basePayload.id = editingId;
+
+    var uploadStep = Promise.resolve();
+    var selectedFile = fFile.files[0];
+
+    if (selectedFile){
+      fileStatus.textContent = 'uploading…';
+      uploadStep = fileToBase64(selectedFile).then(function(b64){
+        return apiUploadFile({
+          filename: selectedFile.name,
+          contentType: selectedFile.type,
+          dataBase64: b64
+        });
+      }).then(function(res){
+        basePayload.fileUrl = res.url;
+        basePayload.fileName = res.filename;
+      });
+    }
+
+    uploadStep
+      .then(function(){ return apiSaveGame(basePayload, !editingId); })
+      .then(function(){ closeModal(); return refresh(); })
+      .catch(function(err){
+        alert(err && err.error ? err.error : 'Something went wrong. Check your admin key and try again.');
+        fileStatus.textContent = '';
+      });
+  });
+
+  deleteBtn.addEventListener('click', function(){
+    if (!isAdmin() || !editingId) return;
+    apiDeleteGame(editingId)
+      .then(function(){ closeModal(); return refresh(); })
+      .catch(function(err){ alert(err && err.error ? err.error : 'Could not remove this game.'); });
+  });
+
+  refresh();
+})();
+</script>
+
+</body>
+</html>

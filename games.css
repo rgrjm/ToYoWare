@@ -1,0 +1,173 @@
+/* games.css — additions only. Loaded after style.css, reuses its variables and classes. */
+
+.navbar__links a.is-active {
+  color: var(--green);
+}
+
+.admin-link {
+  font-size: 0.8rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+}
+.admin-link:hover {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.stat-row {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.stat-row .stat-num {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text);
+}
+.stat-row .stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.filters {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 0;
+}
+.filters button {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 0 10px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.filters button:hover { color: var(--text); }
+.filters button.is-active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.search {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  width: 200px;
+}
+.search:focus { outline: none; border-color: var(--green); }
+.search::placeholder { color: var(--muted); }
+
+.card--status {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.card__status-text {
+  font-size: 0.75rem;
+}
+.card__status-text.status-downloaded { color: var(--green); }
+.card__status-text.status-queued     { color: var(--purple); }
+.card__status-text.status-available  { color: var(--muted); }
+
+.card--add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-style: dashed;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  min-height: 100px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.card--add:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.empty-state {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 20px 0;
+}
+
+.file-status {
+  font-size: 0.8rem;
+  color: var(--purple);
+  margin-top: 6px;
+}
+
+/* ---- modal / overlay (shared by add-edit and login) ---- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+.overlay.is-open { display: flex; }
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+}
+.modal__title {
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+  text-transform: lowercase;
+  color: var(--text);
+}
+.field-row {
+  display: flex;
+  gap: 12px;
+}
+.field-row .contact-form { flex: 1; }
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+.link-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--red);
+}
+.link-btn:hover { text-decoration: underline; }
+.btn--ghost {
+  background: none;
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+}
+.btn--ghost:hover { border-color: var(--muted); transform: none; box-shadow: none; }
