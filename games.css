@@ -1,7 +1,8 @@
-/* games.css — additions only. Loaded after style.css, reuses its variables and classes. */
+/* games.css — additions only. Loaded after style.css, reuses its variables and classes.
+   Polish pass: layout, spacing, states and motion only — palette is unchanged. */
 
 .navbar__links a.is-active {
-  color: var(--green);
+  color: var(--accent-on-dark);
 }
 
 .admin-link {
@@ -9,21 +10,41 @@
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   padding: 4px 10px;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 .admin-link:hover {
-  color: var(--green);
-  border-color: var(--green);
+  color: var(--accent-on-dark);
+  border-color: var(--accent-on-dark);
 }
 
+/* ---- page heading ---- */
+.section__lead {
+  color: var(--text);
+  max-width: 560px;
+  margin: -12px 0 28px;
+  font-size: 0.95rem;
+}
+
+/* ---- stats ---- */
 .stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.stat-row li {
   display: flex;
-  gap: 40px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
 }
 .stat-row .stat-num {
   font-size: 1.6rem;
   font-weight: 800;
+  line-height: 1.2;
   color: var(--text);
 }
 .stat-row .stat-label {
@@ -32,12 +53,21 @@
   margin-top: 2px;
 }
 
+/* ---- toolbar: filters + search ---- */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: 1px solid var(--panel-border);
+}
 .filters {
   display: flex;
   gap: 22px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--panel-border);
-  padding-bottom: 0;
+  flex-wrap: wrap;
 }
 .filters button {
   background: none;
@@ -46,48 +76,134 @@
   font-size: 0.9rem;
   color: var(--muted);
   cursor: pointer;
-  padding: 0 0 10px;
+  padding: 0 0 12px;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.filters button .count {
+  font-size: 0.72rem;
+  margin-left: 4px;
+  opacity: 0.8;
 }
 .filters button:hover { color: var(--text); }
 .filters button.is-active {
   color: var(--green);
   border-bottom-color: var(--green);
 }
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
 .search {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   padding: 10px 12px;
+  margin-bottom: 12px;
   color: var(--text);
   font-family: inherit;
   font-size: 0.9rem;
-  width: 200px;
+  width: 220px;
+  max-width: 100%;
+  transition: border-color 0.15s ease;
 }
 .search:focus { outline: none; border-color: var(--green); }
 .search::placeholder { color: var(--muted); }
 
+.result-count {
+  font-size: 0.8rem;
+  color: var(--text);
+  margin-bottom: 14px;
+  min-height: 1.3em;
+}
+
+/* ---- cards ---- */
+#grid.projects__grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+#grid .card {
+  display: flex;
+  flex-direction: column;
+  animation: card-in 0.3s ease both;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---- thumbnails ---- */
+.card__thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  margin: -22px -22px 16px;          /* bleed to the card edges (card padding is 22px) */
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+  background: #010409;
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card__thumb::before {               /* placeholder: first letter of the title */
+  content: attr(data-initial);
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--muted);
+  opacity: 0.5;
+}
+.card__thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .card--status {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  margin-bottom: 10px;
 }
+.card--status .card__index { margin-bottom: 0; }
+
 .card__status-text {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 4px 9px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
 }
 .card__status-text.status-downloaded { color: var(--green); }
 .card__status-text.status-queued     { color: var(--purple); }
 .card__status-text.status-available  { color: var(--muted); }
+
+.card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.card__meta span {
+  font-size: 0.75rem;
+  color: var(--muted);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 3px 8px;
+}
+
+#grid .card__links {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px dashed var(--panel-border);
+  min-height: 2.6em;
+  align-items: center;
+}
+#grid .card__links a {
+  font-weight: 700;
+}
+.card__links .no-file {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
 
 .card--add {
   display: flex;
@@ -97,18 +213,46 @@
   color: var(--muted);
   cursor: pointer;
   font-size: 0.95rem;
-  min-height: 100px;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  min-height: 150px;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 .card--add:hover {
   border-color: var(--green);
   color: var(--green);
 }
 
+/* ---- loading skeletons ---- */
+.card--skeleton {
+  min-height: 170px;
+  animation: pulse 1.2s ease-in-out infinite !important;
+}
+.card--skeleton span {
+  display: block;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--panel-border);
+  opacity: 0.35;
+  margin-bottom: 14px;
+}
+.card--skeleton span:nth-child(1) { width: 25%; }
+.card--skeleton span:nth-child(2) { width: 70%; height: 18px; }
+.card--skeleton span:nth-child(3) { width: 45%; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+.games-more { margin-top: 8px; }
+
+/* ---- empty state ---- */
 .empty-state {
-  color: var(--muted);
+  color: var(--text);
   font-size: 0.9rem;
-  padding: 20px 0;
+  text-align: center;
+  padding: 40px 20px;
+  border: 1px dashed var(--panel-border);
+  border-radius: var(--radius);
+  margin-top: 20px;
 }
 
 .file-status {
@@ -122,6 +266,7 @@
   position: fixed;
   inset: 0;
   background: rgba(1, 4, 9, 0.7);
+  backdrop-filter: blur(3px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -129,14 +274,22 @@
   z-index: 50;
 }
 .overlay.is-open { display: flex; }
+.overlay.is-open .modal { animation: modal-in 0.2s ease both; }
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
 
 .modal {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 .modal__title {
   font-size: 1.1rem;
@@ -148,7 +301,8 @@
   display: flex;
   gap: 12px;
 }
-.field-row .contact-form { flex: 1; }
+.field-row .contact-form { flex: 1; min-width: 0; }
+.modal .contact-form { max-width: none; }
 
 .modal-actions {
   display: flex;
@@ -156,6 +310,7 @@
   align-items: center;
   margin-top: 20px;
 }
+.modal-actions .btn { margin-top: 0; }
 .link-btn {
   background: none;
   border: none;
@@ -171,3 +326,18 @@
   color: var(--text);
 }
 .btn--ghost:hover { border-color: var(--muted); transform: none; box-shadow: none; }
+.btn:disabled { opacity: 0.6; cursor: wait; transform: none; box-shadow: none; }
+
+/* ---- small screens ---- */
+@media (max-width: 640px) {
+  .toolbar { align-items: stretch; }
+  .search { width: 100%; }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .field-row { flex-direction: column; gap: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #grid .card,
+  .overlay.is-open .modal,
+  .card--skeleton { animation: none !important; }
+}
