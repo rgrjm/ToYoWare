@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <rect width="16" height="16" rx="3" fill="#1b1b1b"/>
+  <!-- orange body -->
+  <path fill="#eb820c" d="
+    M10 3h1v1h-1z
+    M9 4h2v1h-2z
+    M9 5h4v1h-4z
+    M3 6h1v1H3z
+    M9 6h2v1h-2z M12 6h1v1h-1z
+    M2 7h13v1H2z
+    M3 8h12v1H3z
+    M4 9h8v1H4z
+    M4 10h1v2H4z M9 10h1v2H9z M11 10h1v2h-1z"/>
+  <!-- darker shade: ear, tail, back legs -->
+  <path fill="#b87500" d="
+    M11 3h1v2h-1z
+    M2 5h1v2H2z
+    M1 6h1v1H1z
+    M6 10h1v2H6z"/>
+  <!-- eye -->
+  <path fill="#000" d="M11 6h1v1h-1z"/>
+  <!-- light tail tip and paws -->
+  <path fill="#d5c361" d="M1 5h1v1H1z M4 12h1v1H4z M6 12h1v1H6z M9 12h1v1H9z M11 12h1v1h-1z"/>
+</svg>

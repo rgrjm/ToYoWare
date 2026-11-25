@@ -8,7 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Dimitar Kiryakov — Developer Portfolio</title>
-  
+  <meta name="description" content="Portfolio of Dimitar Kiryakov — frontend and Godot game developer. Projects, skills and contact.">
+  <meta name="theme-color" content="#d5c361">
+  <link rel="canonical" href="https://toyoware.com/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Dimitar Kiryakov — Developer Portfolio">
+  <meta property="og:description" content="Frontend and Godot game developer. Projects, skills and contact.">
+  <meta property="og:url" content="https://toyoware.com/">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +33,7 @@
       <span class="dot dot--red"></span>
       <span class="dot dot--yellow"></span>
       <span class="dot dot--green"></span>
-      <a class="navbar__name" href="ToYoWare.html">ToYoWare.com</a>
+      <a class="navbar__name" href="toyoware.html">ToYoWare.com</a>
     </div>
 
     <nav class="navbar__links">
@@ -103,16 +111,16 @@
 
       <article class="card">
         <p class="card__index">01</p>
-        <h3 class="card__title">Righsheouns Card Game</h3>
+        <h3 class="card__title">Rightsheous Card Game</h3>
         <p class="card__desc">
-          A game build with Godot. With rules similar to yu-gi-oh.
+          A card game built with Godot, with rules similar to Yu-Gi-Oh!.
         </p>
         <div class="card__tags">
           <span>GDScript</span><span>Godot</span><span>Card Game</span>
         </div>
         <div class="card__links">
-          <a href="https://toyoware.itch.io/rightsheous-card-game">Main Page→</a>
-          <a href="https://toyoware.itch.io/rightsheous-card-game/purchase">DOWNLOAD→</a>
+          <a href="https://toyoware.itch.io/rightsheous-card-game" target="_blank" rel="noopener">main page →</a>
+          <a href="https://toyoware.itch.io/rightsheous-card-game/purchase" target="_blank" rel="noopener">download →</a>
         </div>
       </article>
 
@@ -120,14 +128,10 @@
         <p class="card__index">02</p>
         <h3 class="card__title">Task Tracker</h3>
         <p class="card__desc">
-          my own asisant like jarvis, but a lot simpler.
+          My own assistant, like Jarvis but a lot simpler. (Demo and source coming soon.)
         </p>
         <div class="card__tags">
           <span>JavaScript</span><span>LocalStorage</span>
-        </div>
-        <div class="card__links">
-          <a href="#">live_demo →</a>
-          <a href="#">source →</a>
         </div>
       </article>
 
@@ -139,9 +143,6 @@
         </p>
         <div class="card__tags">
           <span>HTML</span><span>CSS</span><span>JavaScript</span>
-        </div>
-        <div class="card__links">
-          <a href="#">source →</a>
         </div>
       </article>
 
@@ -172,25 +173,27 @@
     <p class="section__eyebrow">// 04</p>
     <h2 class="section__title">contact</h2>
 
-    <form class="contact-form" id="contact-form">
+    <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact">
+      <p class="hp-field"><label>Don't fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
 
       <label for="name">name</label>
-      <input type="text" id="name" name="name" required placeholder="Jane Doe">
+      <input type="text" id="name" name="name" required autocomplete="name" placeholder="Jane Doe">
 
       <label for="email">email</label>
-      <input type="email" id="email" name="email" required placeholder="jane@example.com">
+      <input type="email" id="email" name="email" required autocomplete="email" placeholder="jane@example.com">
 
       <label for="message">message</label>
       <textarea id="message" name="message" required placeholder="Let's build something."></textarea>
 
       <button type="submit" class="btn">send_message()</button>
 
-      <p id="form-status" class="form-status"></p>
+      <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
     </form>
   </section>
 
   <footer class="footer">
-    <p>&copy; 2026 Dimitar Kiryakov. Built with HTML, CSS &amp; GdScript.</p>
+    <p>&copy; 2026 Dimitar Kiryakov. Built with plain HTML, CSS &amp; JavaScript.</p>
   </footer>
 
   <script src="script.js"></script>

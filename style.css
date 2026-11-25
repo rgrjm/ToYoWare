@@ -14,6 +14,8 @@
   --purple: #d651b9;
   --orange: #000000;
   --red: #ff7b72;
+  --on-dark: #ffffff;
+  --accent-on-dark: #e74c4c;
   --max-width: 900px;
   --radius: 8px;
 }
@@ -23,6 +25,9 @@ html {
 }
 
 body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--text);
   font-family: 'JetBrains Mono', 'Courier New', monospace;
@@ -62,7 +67,7 @@ ul {
 
 .terminal__title {
   margin-left: auto;
-  color: var(--muted);
+  color: var(--on-dark);
   font-size: 0.8rem;
 }
 
@@ -104,21 +109,33 @@ ul {
 .navbar__name {
   margin-left: 8px;
   font-weight: 700;
-  color: var(--green);
+  color: var(--accent-on-dark);
 }
 
 .navbar__links {
   display: flex;
   gap: 28px;
   font-size: 0.9rem;
-  color: var(--muted);
+  color: var(--on-dark);
 }
-.navbar__links a:hover {
-  color: var(--green);
+.navbar__links a:hover,
+.navbar__links a.is-active {
+  color: var(--accent-on-dark);
+}
+
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible {
+  outline: 3px solid #000;
+  outline-offset: 3px;
+}
+.navbar a:focus-visible {
+  outline-color: #fff;
 }
 
 
 .hero {
+  width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 70px clamp(20px, 6vw, 80px) 40px;
@@ -173,6 +190,7 @@ ul {
 
 
 .section {
+  width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 60px clamp(20px, 6vw, 80px);
@@ -288,6 +306,7 @@ ul {
   margin-bottom: 6px;
 }
 .contact-form input,
+.contact-form select,
 .contact-form textarea {
   background: var(--panel);
   border: 1px solid var(--panel-border);
@@ -298,8 +317,10 @@ ul {
   font-size: 0.95rem;
 }
 .contact-form input:focus,
+.contact-form select:focus,
 .contact-form textarea:focus {
-  outline: none;
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
   border-color: var(--green);
 }
 .contact-form textarea {
@@ -312,8 +333,12 @@ ul {
   color: var(--green);
   min-height: 1.2em;
 }
+.form-status--ok    { color: #7ee787; }
+.form-status--error { color: #ff7b72; }
+.hp-field { position: absolute; left: -9999px; }
 
 .footer {
+  margin-top: auto;
   text-align: center;
   padding: 30px;
   color: var(--muted);
@@ -322,10 +347,19 @@ ul {
 }
 
 @media (max-width: 640px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
   .navbar__links {
+    flex-wrap: wrap;
     gap: 14px;
     font-size: 0.8rem;
   }
+  .hero { padding-top: 40px; }
+  .section { padding-top: 40px; padding-bottom: 40px; }
 
   .about__grid {
     grid-template-columns: 1fr;

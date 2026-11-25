@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <title>ToYoWare — games</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="The ToYoWare game library — browse, search and download games.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +23,7 @@
       <span class="dot dot--red"></span>
       <span class="dot dot--yellow"></span>
       <span class="dot dot--green"></span>
-      <a class="navbar__name" href="ToYoWare.html">ToYoWare.com</a>
+      <a class="navbar__name" href="toyoware.html">ToYoWare.com</a>
     </div>
 
     <nav class="navbar__links">
@@ -60,6 +62,7 @@
   <section class="section">
     <div class="section__eyebrow">$ cd ~/games</div>
     <h1 class="section__title">game library</h1>
+    <p class="section__lead">Browse, search and download games from the ToYoWare library.</p>
 
     <ul class="about__facts stat-row" id="statFacts"></ul>
 
@@ -70,18 +73,24 @@
         <button data-filter="queued">queued</button>
         <button data-filter="available">not downloaded</button>
       </div>
-      <input class="search" id="search" placeholder="search games" />
+      <input class="search" id="search" type="search" aria-label="Search games" placeholder="search games" />
     </div>
 
-    <div class="projects__grid" id="grid"></div>
+    <p class="result-count" id="resultCount" aria-live="polite"></p>
 
-    <p class="empty-state" id="emptyState" style="display:none;"></p>
+    <div class="projects__grid" id="grid" aria-busy="true">
+      <div class="card card--skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="card card--skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="card card--skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+
+    <p class="empty-state" id="emptyState" role="status" style="display:none;"></p>
   </section>
 
   <!-- Admin login -->
   <div class="overlay" id="loginOverlay">
-    <div class="modal">
-      <h2 class="modal__title">admin login</h2>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <h2 class="modal__title" id="loginTitle">admin login</h2>
       <div class="contact-form">
         <label for="adminKeyInput">admin key</label>
         <input id="adminKeyInput" type="password" placeholder="enter admin key">
@@ -98,7 +107,7 @@
 
   <!-- Add / edit game -->
   <div class="overlay" id="overlay">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <h2 class="modal__title" id="modalTitle">add game</h2>
 
       <div class="contact-form">
@@ -137,6 +146,17 @@
         <input id="fFileUrl" placeholder="https://...">
       </div>
 
+      <div class="contact-form">
+        <label for="fThumb">thumbnail image (optional)</label>
+        <input id="fThumb" type="file" accept="image/*">
+        <div id="thumbStatus" class="file-status"></div>
+      </div>
+
+      <div class="contact-form">
+        <label for="fThumbUrl">or paste a thumbnail image link</label>
+        <input id="fThumbUrl" placeholder="https://...">
+      </div>
+
       <div class="modal-actions">
         <button class="link-btn" id="deleteBtn" style="display:none;">remove game</button>
         <div style="display:flex; gap:10px;">
@@ -159,11 +179,14 @@
   var searchTerm = '';
   var editingId = null;
   var pendingUpload = null; // { filename, contentType, dataBase64 }
+  var loaded = false;       // true once the first request has finished (success or not)
+  var loadError = false;
 
   var grid = document.getElementById('grid');
   var emptyState = document.getElementById('emptyState');
   var statFacts = document.getElementById('statFacts');
   var terminalOutput = document.getElementById('terminalOutput');
+  var resultCount = document.getElementById('resultCount');
   var filtersEl = document.getElementById('filters');
   var searchEl = document.getElementById('search');
   var overlay = document.getElementById('overlay');
@@ -175,6 +198,9 @@
   var fFile = document.getElementById('fFile');
   var fFileUrl = document.getElementById('fFileUrl');
   var fileStatus = document.getElementById('fileStatus');
+  var fThumb = document.getElementById('fThumb');
+  var fThumbUrl = document.getElementById('fThumbUrl');
+  var thumbStatus = document.getElementById('thumbStatus');
   var deleteBtn = document.getElementById('deleteBtn');
   var adminToggle = document.getElementById('adminToggle');
   var loginOverlay = document.getElementById('loginOverlay');
@@ -190,10 +216,24 @@
     div.textContent = str || '';
     return div.innerHTML;
   }
+  // For values placed inside HTML attributes (also escapes quotes).
+  function escapeAttr(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  // Only allow http(s) or site-relative links (blocks javascript: URLs).
+  function safeUrl(url){
+    url = String(url || '').trim();
+    return /^(https?:\/\/|\/(?!\/))/i.test(url) ? url : '';
+  }
 
   // ---- API ----
   function apiGetGames(){
-    return fetch('/.netlify/functions/games').then(function(r){ return r.json(); });
+    return fetch('/.netlify/functions/games').then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
   }
   function apiSaveGame(game, isNew){
     return fetch('/.netlify/functions/games', {
@@ -242,45 +282,69 @@
     var totalSize = games.filter(function(g){ return g.status === 'downloaded'; })
       .reduce(function(sum,g){ return sum + (parseFloat(g.size)||0); }, 0);
 
+    var dash = '–';
     statFacts.innerHTML =
-      '<li><span class="stat-num">' + total + '</span><span class="stat-label">tracked</span></li>' +
-      '<li><span class="stat-num">' + downloaded + '</span><span class="stat-label">downloaded</span></li>' +
-      '<li><span class="stat-num">' + totalSize.toFixed(1) + ' GB</span><span class="stat-label">on disk</span></li>';
+      '<li><span class="stat-num">' + (loaded ? total : dash) + '</span><span class="stat-label">tracked</span></li>' +
+      '<li><span class="stat-num">' + (loaded ? downloaded : dash) + '</span><span class="stat-label">downloaded</span></li>' +
+      '<li><span class="stat-num">' + (loaded ? totalSize.toFixed(1) + ' GB' : dash) + '</span><span class="stat-label">on disk</span></li>';
 
-    terminalOutput.textContent = total === 0
-      ? 'no games tracked yet'
+    terminalOutput.textContent = !loaded ? 'reading library…'
+      : loadError ? 'could not reach the library — check your connection'
+      : total === 0 ? 'no games tracked yet'
       : downloaded + ' of ' + total + ' games downloaded  ·  ' + totalSize.toFixed(1) + ' GB on disk';
 
     var list = games.filter(function(g){
       if (activeFilter !== 'all' && g.status !== activeFilter) return false;
-      if (searchTerm && g.title.toLowerCase().indexOf(searchTerm.toLowerCase()) === -1) return false;
+      if (searchTerm && String(g.title || '').toLowerCase().indexOf(searchTerm.toLowerCase()) === -1) return false;
       return true;
     });
 
     var cardsHtml = list.map(function(g, i){
-      var downloadLink = g.fileUrl
-        ? '<a href="' + g.fileUrl + '" target="_blank" rel="noopener">download</a>'
+      var url = safeUrl(g.fileUrl);
+      var thumb = safeUrl(g.thumbnailUrl);
+      var status = statusLabel[g.status] ? g.status : 'available';
+      var downloadLink = url
+        ? '<a href="' + escapeAttr(url) + '" target="_blank" rel="noopener">download</a>'
         : '';
-      var editLink = isAdmin() ? '<a href="#" data-edit="' + g.id + '">edit</a>' : '';
+      var editLink = isAdmin() ? '<a href="#" data-edit="' + escapeAttr(g.id) + '">edit</a>' : '';
       return '' +
-        '<div class="card" data-id="' + g.id + '">' +
+        '<div class="card" data-id="' + escapeAttr(g.id) + '">' +
+          '<div class="card__thumb" data-initial="' + escapeAttr(String(g.title || '?').trim().charAt(0).toUpperCase() || '?') + '">' +
+            (thumb ? '<img src="' + escapeAttr(thumb) + '" alt="' + escapeAttr(g.title) + ' thumbnail" loading="lazy">' : '') +
+          '</div>' +
           '<div class="card--status">' +
             '<div class="card__index">' + String(i+1).padStart(2,'0') + '</div>' +
-            '<div class="card__status-text status-' + g.status + '">' + statusLabel[g.status] + '</div>' +
+            '<div class="card__status-text status-' + status + '">' + statusLabel[status] + '</div>' +
           '</div>' +
           '<div class="card__title">' + escapeHtml(g.title) + '</div>' +
-          '<div class="card__desc">' + escapeHtml(g.platform || '—') + (g.size ? ' · ' + parseFloat(g.size).toFixed(1) + ' GB' : '') + '</div>' +
-          '<div class="card__links">' + downloadLink + editLink + '</div>' +
+          '<div class="card__meta">' +
+            '<span>' + escapeHtml(g.platform || 'unknown platform') + '</span>' +
+            (g.size ? '<span>' + parseFloat(g.size).toFixed(1) + ' GB</span>' : '') +
+          '</div>' +
+          '<div class="card__links">' + (downloadLink || '<span class="no-file">no download yet</span>') + editLink + '</div>' +
         '</div>';
     }).join('');
 
     var addCardHtml = isAdmin() ? '<div class="card card--add" id="addCard">+ add game</div>' : '';
 
+    if (!loaded) return; // still loading: keep the skeleton cards in the grid
+    grid.removeAttribute('aria-busy');
     grid.innerHTML = cardsHtml + addCardHtml;
+
+    // filter counts + "showing x of y"
+    filtersEl.querySelectorAll('button').forEach(function(b){
+      var f = b.dataset.filter;
+      var n = f === 'all' ? total : games.filter(function(g){ return g.status === f; }).length;
+      var label = b.dataset.label || (b.dataset.label = b.textContent);
+      b.innerHTML = label + '<span class="count">' + n + '</span>';
+    });
+    resultCount.textContent = total === 0 ? '' : 'showing ' + list.length + ' of ' + total;
 
     if (list.length === 0){
       emptyState.style.display = 'block';
-      emptyState.textContent = games.length === 0
+      emptyState.textContent = loadError
+        ? 'Could not load the game library. Please refresh and try again.'
+        : games.length === 0
         ? (isAdmin() ? 'nothing here yet — click "add game" to start tracking what\'s downloaded.' : 'nothing here yet.')
         : 'no matches for this filter or search.';
     } else {
@@ -293,10 +357,13 @@
 
   function refresh(){
     return apiGetGames().then(function(data){
-      games = data;
-      render();
+      games = Array.isArray(data) ? data : [];
+      loadError = false;
     }).catch(function(){
-      terminalOutput.textContent = 'could not reach the library — check your connection';
+      loadError = true;
+    }).then(function(){
+      loaded = true;
+      render();
     });
   }
 
@@ -378,6 +445,9 @@
     fFile.value = '';
     fFileUrl.value = game ? (game.fileUrl || '') : '';
     fileStatus.textContent = game && game.fileName ? ('current file: ' + game.fileName) : '';
+    fThumb.value = '';
+    fThumbUrl.value = game ? (game.thumbnailUrl || '') : '';
+    thumbStatus.textContent = '';
     deleteBtn.style.display = game ? 'inline-block' : 'none';
     overlay.classList.add('is-open');
     fTitle.focus();
@@ -401,6 +471,16 @@
     if (game) openModal(game);
   });
 
+  fThumb.addEventListener('change', function(){
+    if (!fThumb.files[0]) return;
+    thumbStatus.textContent = 'selected: ' + fThumb.files[0].name + ' (will upload on save)';
+  });
+
+  // Hide broken thumbnails so the letter placeholder shows instead.
+  grid.addEventListener('error', function(e){
+    if (e.target && e.target.tagName === 'IMG') e.target.style.display = 'none';
+  }, true);
+
   fFile.addEventListener('change', function(){
     if (!fFile.files[0]) return;
     fileStatus.textContent = 'selected: ' + fFile.files[0].name + ' (will upload on save)';
@@ -417,7 +497,8 @@
       size: fSize.value,
       status: fStatus.value,
       fileUrl: fFileUrl.value.trim(),
-      fileName: ''
+      fileName: '',
+      thumbnailUrl: fThumbUrl.value.trim()
     };
     if (editingId) basePayload.id = editingId;
 
@@ -438,12 +519,29 @@
       });
     }
 
-    uploadStep
+    var thumbStep = Promise.resolve();
+    var selectedThumb = fThumb.files[0];
+
+    if (selectedThumb){
+      thumbStatus.textContent = 'uploading…';
+      thumbStep = fileToBase64(selectedThumb).then(function(b64){
+        return apiUploadFile({
+          filename: selectedThumb.name,
+          contentType: selectedThumb.type,
+          dataBase64: b64
+        });
+      }).then(function(res){
+        basePayload.thumbnailUrl = res.url;
+      });
+    }
+
+    Promise.all([uploadStep, thumbStep])
       .then(function(){ return apiSaveGame(basePayload, !editingId); })
       .then(function(){ closeModal(); return refresh(); })
       .catch(function(err){
         alert(err && err.error ? err.error : 'Something went wrong. Check your admin key and try again.');
         fileStatus.textContent = '';
+        thumbStatus.textContent = '';
       });
   });
 
@@ -454,6 +552,7 @@
       .catch(function(err){ alert(err && err.error ? err.error : 'Could not remove this game.'); });
   });
 
+  render();   // draw the stats placeholders right away
   refresh();
 })();
 </script>

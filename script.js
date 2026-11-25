@@ -1,59 +1,64 @@
-const textToType = "echo 'let's build something great'";
-
-const typedTextEl = document.getElementById("typed-text");
-
-let charIndex = 0;
-
-function typeNextChar() {
-  if (charIndex < textToType.length) {
-    typedTextEl.textContent += textToType.charAt(charIndex);
-    charIndex++;
-
-    const delay = 40 + Math.random() * 50;
-    setTimeout(typeNextChar, delay);
-  }
-}
-
-typeNextChar();
-
+// ---- Contact form (Netlify Forms) ----
 const contactForm = document.getElementById("contact-form");
 const formStatus = document.getElementById("form-status");
 
-contactForm.addEventListener("submit", function (event) {
-  event.preventDefault();
+function setStatus(text, kind) {
+  formStatus.textContent = text;
+  formStatus.classList.remove("form-status--ok", "form-status--error");
+  if (kind) formStatus.classList.add(`form-status--${kind}`);
+}
 
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const message = document.getElementById("message").value.trim();
+if (contactForm && formStatus) {
+  contactForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  if (!name || !email || !message) {
-    formStatus.textContent = "Please fill in every field.";
-    formStatus.style.color = "#ff7b72";
-    return;
-  }
+    const data = new FormData(contactForm);
+    const name = String(data.get("name") || "").trim();
 
-  formStatus.textContent = `Thanks, ${name}! Your message has been noted (demo only — not actually sent).`;
-  formStatus.style.color = "#7ee787";
+    if (!name || !String(data.get("email") || "").trim() || !String(data.get("message") || "").trim()) {
+      setStatus("Please fill in every field.", "error");
+      return;
+    }
 
-  contactForm.reset();
-});
+    const button = contactForm.querySelector("button[type='submit']");
+    if (button) button.disabled = true;
+    setStatus("Sending…", null);
 
+    try {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(data).toString(),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      setStatus(`Thanks, ${name}! Your message was sent.`, "ok");
+      contactForm.reset();
+    } catch (err) {
+      setStatus("Sorry, something went wrong. Please try again in a moment.", "error");
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+}
+
+// ---- Highlight the nav link of the section currently in view ----
 const sections = document.querySelectorAll("section[id]");
-
 const navLinks = document.querySelectorAll(".navbar__links a");
 
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
+if ("IntersectionObserver" in window && sections.length) {
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
         const id = entry.target.getAttribute("id");
         navLinks.forEach((link) => {
-          link.style.color = link.getAttribute("href") === `#${id}` ? "#7ee787" : "";
+          link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
         });
-      }
-    });
-  },
-  { rootMargin: "-50% 0px -50% 0px" }
-);
+      });
+    },
+    { rootMargin: "-50% 0px -50% 0px" }
+  );
 
-sections.forEach((section) => sectionObserver.observe(section));
+  sections.forEach((section) => sectionObserver.observe(section));
+}
