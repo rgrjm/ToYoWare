@@ -6,24 +6,18 @@
   <meta charset="UTF-8">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Dimitar Kiryakov — Developer Portfolio</title>
-  <meta name="description" content="Portfolio of Dimitar Kiryakov — frontend and Godot game developer. Projects, skills and contact.">
-  <meta name="theme-color" content="#d5c361">
-  <link rel="canonical" href="https://toyoware.com/">
+  <title>ToYoWare — about</title>
+  <meta name="description" content="ToYoWare — games and web projects by Dimitar Kiryakov.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Dimitar Kiryakov — Developer Portfolio">
-  <meta property="og:description" content="Frontend and Godot game developer. Projects, skills and contact.">
-  <meta property="og:url" content="https://toyoware.com/">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="games.css">
 </head>
+
 
 <body>
 
@@ -33,58 +27,34 @@
       <span class="dot dot--red"></span>
       <span class="dot dot--yellow"></span>
       <span class="dot dot--green"></span>
-      <a class="navbar__name" href="toyoware.html">ToYoWare.com</a>
+      <a class="navbar__name" href="portfolio.html">ToYoWare.com</a>
     </div>
 
     <nav class="navbar__links">
-      <a href="#about">about</a>
-      <a href="#projects">projects</a>
-      <a href="#skills">skills</a>
-      <a href="#contact">contact</a>
+      <a href="#games">Games</a>
+      <a href="#about">About</a>
     </nav>
   </header>
 
-  <section class="hero">
+  <section id="games" class="section">
+    <p class="section__eyebrow">// games</p>
+    <h1 class="section__title">games</h1>
+    <p class="section__lead">The latest from the ToYoWare game library, in the same order as the full library.</p>
 
-    <div class="terminal">
-
-      <div class="terminal__bar">
-        <span class="dot dot--red"></span>
-        <span class="dot dot--yellow"></span>
-        <span class="dot dot--green"></span>
-        <span class="terminal__title">bash — 80x24</span>
-      </div>
-
-      <div class="terminal__body">
-        <p class="terminal__line">
-          <span class="prompt">ToYo@Ware</span><span class="path">:~$</span>
-          <span class="cmd">run intro1</span>
-        </p>
-        <p class="terminal__output">Dimitar Kiryakov — Frontend &amp; Godot developer</p>
-
-        <p class="terminal__line">
-          <span class="prompt">ToYo@Ware</span><span class="path">:~$</span>
-          <span class="cmd">run Portfolio</span>
-        </p>
-      </div>
+    <div class="projects__grid" id="grid" aria-busy="true">
+      <div class="card card--skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="card card--skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+      <div class="card card--skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
     </div>
 
-    <h1 class="hero__title">
-      I build things<br>
-      for the <span class="highlight">web.</span>
-    </h1>
+    <p class="empty-state" id="emptyState" role="status" style="display:none;"></p>
 
-    <p class="hero__subtitle">
-      // clean, fast, accessible interfaces — built with HTML, CSS &amp; JavaScript.
-    </p>
-
-    <a href="#projects" class="btn">see_my_work()</a>
+    <p class="games-more"><a class="btn" href="games.html">open full game library →</a></p>
   </section>
 
   <section id="about" class="section">
 
-    <p class="section__eyebrow">// 01</p>
-    <h2 class="section__title">about</h2>
+    <h1 class="section__title">about</h1>
 
     <div class="about__grid">
       <p class="about__text">
@@ -95,107 +65,89 @@
       </p>
 
       <ul class="about__facts">
-        <li><span class="key">location</span><span class="val">Remote/ In office</span></li>
-        <li><span class="key">focus</span><span class="val">Frontend / Game Design</span></li>
-        <li><span class="key">status</span><span class="val">Open to work</span></li>
+        <li><span class="key">Location</span><span class="val">Remote/ In office</span></li>
+        <li><span class="key">Focus</span><span class="val">Frontend / Game Design</span></li>
+        <li><span class="key">Status</span><span class="val">Open to work</span></li>
         <li><span class="key">Experience</span><span class="val">1 year</span></li>
       </ul>
     </div>
   </section>
 
-  <section id="projects" class="section">
-    <p class="section__eyebrow">// 02</p>
-    <h2 class="section__title">projects</h2>
-
-    <div class="projects__grid">
-
-      <article class="card">
-        <p class="card__index">01</p>
-        <h3 class="card__title">Rightsheous Card Game</h3>
-        <p class="card__desc">
-          A card game built with Godot, with rules similar to Yu-Gi-Oh!.
-        </p>
-        <div class="card__tags">
-          <span>GDScript</span><span>Godot</span><span>Card Game</span>
-        </div>
-        <div class="card__links">
-          <a href="https://toyoware.itch.io/rightsheous-card-game" target="_blank" rel="noopener">main page →</a>
-          <a href="https://toyoware.itch.io/rightsheous-card-game/purchase" target="_blank" rel="noopener">download →</a>
-        </div>
-      </article>
-
-      <article class="card">
-        <p class="card__index">02</p>
-        <h3 class="card__title">Task Tracker</h3>
-        <p class="card__desc">
-          My own assistant, like Jarvis but a lot simpler. (Demo and source coming soon.)
-        </p>
-        <div class="card__tags">
-          <span>JavaScript</span><span>LocalStorage</span>
-        </div>
-      </article>
-
-      <article class="card">
-        <p class="card__index">03</p>
-        <h3 class="card__title">This Portfolio</h3>
-        <p class="card__desc">
-          The very site you're looking at — plain HTML, CSS and JavaScript, no frameworks.
-        </p>
-        <div class="card__tags">
-          <span>HTML</span><span>CSS</span><span>JavaScript</span>
-        </div>
-      </article>
-
-    </div>
-  </section>
-
-  <section id="skills" class="section">
-    <p class="section__eyebrow">// 03</p>
-    <h2 class="section__title">skills</h2>
-
-    <div class="skills__panel">
-      <div class="terminal__bar">
-        <span class="dot dot--red"></span>
-        <span class="dot dot--yellow"></span>
-        <span class="dot dot--green"></span>
-        <span class="terminal__title">skills.json</span>
-      </div>
-      <pre class="skills__code"><span class="tok-punc">{</span>
-  <span class="tok-key">"languages"</span><span class="tok-punc">:</span> [<span class="tok-str">"HTML"</span>, <span class="tok-str">"CSS"</span>, <span class="tok-str">"GDScript"</span>]<span class="tok-punc">,</span>
-  <span class="tok-key">"comfortable_with"</span><span class="tok-punc">:</span> [<span class="tok-str">"Git"</span>, <span class="tok-str">"Responsive Design"</span>, <span class="tok-str">"REST APIs"</span>]<span class="tok-punc">,</span>
-  <span class="tok-key">"currently_learning"</span><span class="tok-punc">:</span> <span class="tok-str">"node.js"</span><span class="tok-punc">,</span>
-  <span class="tok-key">"soft_skills"</span><span class="tok-punc">:</span> [<span class="tok-str">"communication"</span>, <span class="tok-str">"problem solving"</span>]
-<span class="tok-punc">}</span></pre>
-    </div>
-  </section>
-
-  <section id="contact" class="section">
-    <p class="section__eyebrow">// 04</p>
-    <h2 class="section__title">contact</h2>
-
-    <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
-      <input type="hidden" name="form-name" value="contact">
-      <p class="hp-field"><label>Don't fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
-
-      <label for="name">name</label>
-      <input type="text" id="name" name="name" required autocomplete="name" placeholder="Jane Doe">
-
-      <label for="email">email</label>
-      <input type="email" id="email" name="email" required autocomplete="email" placeholder="jane@example.com">
-
-      <label for="message">message</label>
-      <textarea id="message" name="message" required placeholder="Let's build something."></textarea>
-
-      <button type="submit" class="btn">send_message()</button>
-
-      <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
-    </form>
-  </section>
-
   <footer class="footer">
-    <p>&copy; 2026 Dimitar Kiryakov. Built with plain HTML, CSS &amp; JavaScript.</p>
+    <p>&copy; 2026 Dimitar Kiryakov — ToYoWare.com</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+  (function () {
+    var grid = document.getElementById('grid');
+    var emptyState = document.getElementById('emptyState');
+    var statusLabel = { downloaded: 'downloaded', queued: 'queued', available: 'not downloaded' };
+
+    function escapeAttr(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    // Only allow http(s) or site-relative links (blocks javascript: URLs).
+    function safeUrl(url) {
+      url = String(url || '').trim();
+      return /^(https?:\/\/|\/(?!\/))/i.test(url) ? url : '';
+    }
+
+    function showMessage(text) {
+      grid.removeAttribute('aria-busy');
+      grid.innerHTML = '';
+      emptyState.style.display = 'block';
+      emptyState.textContent = text;
+    }
+
+    // Hide broken thumbnails so the letter placeholder shows instead.
+    grid.addEventListener('error', function (e) {
+      if (e.target && e.target.tagName === 'IMG') e.target.style.display = 'none';
+    }, true);
+
+    fetch('/.netlify/functions/games')
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (games) {
+        if (!Array.isArray(games) || games.length === 0) {
+          showMessage('No games in the library yet.');
+          return;
+        }
+        // Same order as games.html (the order the library returns them).
+        grid.removeAttribute('aria-busy');
+        grid.innerHTML = games.map(function (g, i) {
+          var url = safeUrl(g.fileUrl);
+          var status = statusLabel[g.status] ? g.status : 'available';
+          var thumb = safeUrl(g.thumbnailUrl);
+          return '' +
+            '<div class="card">' +
+              '<div class="card__thumb" data-initial="' + escapeAttr(String(g.title || '?').trim().charAt(0).toUpperCase() || '?') + '">' +
+                (thumb ? '<img src="' + escapeAttr(thumb) + '" alt="' + escapeAttr(g.title) + ' thumbnail" loading="lazy">' : '') +
+              '</div>' +
+              '<div class="card--status">' +
+                '<div class="card__index">' + String(i + 1).padStart(2, '0') + '</div>' +
+                '<div class="card__status-text status-' + status + '">' + statusLabel[status] + '</div>' +
+              '</div>' +
+              '<div class="card__title">' + escapeAttr(g.title) + '</div>' +
+              '<div class="card__meta">' +
+                '<span>' + escapeAttr(g.platform || 'unknown platform') + '</span>' +
+                (g.size ? '<span>' + parseFloat(g.size).toFixed(1) + ' GB</span>' : '') +
+              '</div>' +
+              '<div class="card__links">' +
+                (url ? '<a href="' + escapeAttr(url) + '" target="_blank" rel="noopener">download</a>'
+                     : '<span class="no-file">no download yet</span>') +
+              '</div>' +
+            '</div>';
+        }).join('');
+      })
+      .catch(function () {
+        showMessage('Could not load the games right now. Try the full library page.');
+      });
+  })();
+  </script>
+
 </body>
 </html>
